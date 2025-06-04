@@ -13,44 +13,61 @@ spec:
         app: exchange
     spec:
       containers:
-          - name: exchange
-            image: 'benisli/exchange:latest'
-            imagePullPolicy: IfNotPresent
-            ports:
-              - containerPort: 8080
-            env:
-              - name: DATABASE_HOST
-                valueFrom:
-                  configMapKeyRef:
-                    name: postgres-configmap
-                    key: POSTGRES_HOST
+        - name: exchange
+          image: 'benisli/exchange:latest'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configmap
+                  key: POSTGRES_HOST
 
-              - name: DATABASE_USER
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-secrets
-                    key: POSTGRES_USER
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_USER
 
-              - name: DATABASE_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-secrets
-                    key: POSTGRES_PASSWORD
-
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_PASSWORD
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-    name: exchange
-    labels:
-        app: exchange
+  name: exchange
+  labels:
+    app: exchange
 spec:
-    type: ClusterIP
-    ports:
-        - port: 8080
-    selector:
-        app: exchange
+  type: ClusterIP
+  ports:
+    - port: 8080
+  selector:
+    app: exchange
 
-  
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-configmap
+data:
+  POSTGRES_HOST: postgres.default.svc.cluster.local
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secrets
+type: Opaque
+stringData:
+  POSTGRES_USER: meuuser
+  POSTGRES_PASSWORD: minhasenha
